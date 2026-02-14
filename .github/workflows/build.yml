@@ -1,0 +1,36 @@
+name: Build MIDI Synth ISO
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Build ISO
+      run: |
+        mkdir -p output
+        docker run --rm --privileged \
+          -v $PWD:/workspace \
+          -w /workspace \
+          archlinux:latest \
+          bash -c '
+            set -e
+            pacman -Syu --noconfirm archiso
+            cp -r /usr/share/archiso/configs/releng /tmp/profile
+            cat packages.txt >> /tmp/profile/packages.x86_64
+            install -m 755 customize.sh /tmp/profile/airootfs/root/customize_airootfs.sh
+            mkarchiso -v -w /tmp/work -o /workspace/output /tmp/profile
+            ls -lh /workspace/output/*.iso
+          '
+    
+    - name: Upload ISO
+      uses: actions/upload-artifact@v4
+      with:
+        name: midi-synth-iso
+        path: output/*.iso
+        retention-days: 7
+        compression-level: 0
