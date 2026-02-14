@@ -1,0 +1,6 @@
+fluidsynth
+soundfont-fluid
+alsa-utils
+alsa-lib
+alsa-firmware
+rtkit
